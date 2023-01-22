@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     htoprb (0.1.0)
-      curses
+      curses (= 1.4.4)
 
 GEM
   remote: https://rubygems.org/
@@ -38,7 +38,7 @@ PLATFORMS
 DEPENDENCIES
   htoprb!
   rake (~> 13.0)
-  rubocop
+  rubocop (= 1.43.0)
 
 BUNDLED WITH
    2.3.9

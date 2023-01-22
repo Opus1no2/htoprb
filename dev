@@ -1,0 +1,3 @@
+#!/bin/bash
+gem build -o htoprb_develop.gem htoprb.gemspec
+gem install --local htoprb_develop.gem
