@@ -2,38 +2,29 @@ module Htoprb
   class Render
     include Curses
 
-    attr_accessor :processes, :curses
+    attr_accessor :process_list, :curses
 
-    def initialize(processes = Htoprb::Processes)
-      @processes = processes
+    def initialize(process_list = Htoprb::ProcessList.new)
+      @process_list = process_list
+
+      noecho
+      curs_set(0)
+      crmode
     end
 
     def init
       init_screen
-      nl
-      noecho
-      curs_set 0
-      #stdscr.scrollok(true)
-      #setscrreg(100, 100)
+      stdscr.scrollok(true)
 
       begin
         loop do
-          running = processes.call
-          setpos(0, 0)
-          addstr("Tasks #{running.total}")
-          refresh
-
-          running.processes.each.with_index do |p, idx|
-            setpos(idx + 1, 0)
-            addstr(p[0..50])
-            refresh
-          end
+          @process_list.render
 
           sleep 1
         end
       rescue => exception
         Curses.close_screen
-        raise exception
+        p exception
       end
     end
   end

@@ -4,7 +4,7 @@ require_relative 'htoprb/version'
 
 require 'curses'
 require 'open3'
-require 'htoprb/processes'
+require 'htoprb/process_list'
 require 'htoprb/render'
 
 module Htoprb
