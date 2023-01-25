@@ -8,20 +8,15 @@ module Htoprb
       @process_list = process_list
 
       noecho
-      curs_set(0)
       crmode
+      curs_set(0)
+      stdscr.scrollok(true)
+      init_screen
     end
 
     def init
-      init_screen
-      stdscr.scrollok(true)
-
       begin
-        loop do
-          @process_list.render
-
-          sleep 1
-        end
+        @process_list.render
       rescue => exception
         Curses.close_screen
         p exception
