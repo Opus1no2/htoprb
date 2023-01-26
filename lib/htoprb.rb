@@ -12,7 +12,7 @@ module Htoprb
 
   def self.init
     Htoprb::Render.new.init
-  rescue => exception
-    p exception
+  rescue StandardError => e
+    p e
   end
 end

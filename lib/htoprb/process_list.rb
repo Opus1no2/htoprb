@@ -1,17 +1,23 @@
+# frozen_string_literal: true
+
 module Htoprb
+  # TODO: separate process list logic from ncurses logic
   class ProcessList
     attr_accessor :start_idx, :win, :current, :processes, :timeout
 
+    FRAMERATE = 1.0 / 24.0
+
     def initialize
       @start_idx = 0
-      @current = 0
+      @current = 1
       @processes = []
       @needs_refresh = true
-      @pause_refresh = false
-      @timeout = 500
+      @moving = false
+      @timeout = 1000
 
       Curses.start_color
-      Curses.init_pair(1, 6, 0)
+      Curses.init_pair(1, 0, 6)
+      Curses.init_pair(2, 0, 2)
 
       init_window
     end
@@ -25,7 +31,7 @@ module Htoprb
     end
 
     def running_processes
-      stdout, stderr, wait_thr = Open3.capture3('ps', 'aux')
+      stdout, _stderr, _wait_thr = Open3.capture3('ps', 'aux')
       stdout.split("\n")
     end
 
@@ -36,9 +42,14 @@ module Htoprb
 
       loop do
         ch = @win.getch
+
         break if ch == 'q'
 
         new_time = Time.now
+
+        # This pauses the entire from updating while navigating via up/down arrows
+        # In the future - this should pause the list but allow specific status to update
+        old_time = new_time if @moving
 
         if (new_time - old_time) * 1000.0 > @timeout
           @processes = running_processes
@@ -46,48 +57,25 @@ module Htoprb
           old_time = new_time
         end
 
-        if ch == Curses::KEY_UP
-          # This needs work
-          if @start_idx.positive? && @processes.length > Curses.lines
-            # @start_idx += -1
-            # end_idx += -1
-          end
-
-          if @current.positive?
-            @current += -1
-            @needs_refresh = true
-          end
+        case ch
+        when Curses::KEY_UP
+          handle_key_up
+        when Curses::KEY_DOWN
+          handle_key_down
+        when nil
+          @moving = false
         end
 
-        if ch == Curses::KEY_DOWN
-          # This needs work
-          if end_idx < @processes.length && @processes.length > @win.maxy
-            # @start_idx += 1
-            # end_idx += 1
-          end
+        sleep(FRAMERATE) unless @needs_refresh
 
-          if @current < @processes.length - 1
-            @current += 1
-            @needs_refresh = true
-          end
-        end
-
-        sleep(1.0 / 24.0) unless @needs_refresh || @pause_refresh
-
-        refresh_process_list(@start_idx, end_idx) if @needs_refresh
+        render_process_list(@start_idx, end_idx) if @needs_refresh
       end
     end
 
-    def refresh_process_list(start_idx, end_idx)
+    def render_process_list(start_idx, end_idx)
       @processes[start_idx..end_idx].each.with_index do |process, idx|
         @win.setpos(idx, 0)
-        if idx == @current
-          @win.attron(Curses.color_pair(1))
-          @win.addstr(process)
-          @win.attroff(Curses.color_pair(1))
-        else
-          @win.addstr(process)
-        end
+        render_process(process, idx)
         @win.clrtoeol
       end
 
@@ -97,10 +85,54 @@ module Htoprb
 
     def end_idx
       @end_idx = if @processes.length > Curses.lines - 2
-                  Curses.lines - 2
-                else
-                  @processes.length - 1
-                end
+                   Curses.lines - 2
+                 else
+                   @processes.length - 1
+                 end
+    end
+
+    def handle_key_up
+      @moving = true
+
+      # This needs work
+      if @start_idx.positive? && @processes.length > Curses.lines
+        # @start_idx += -1
+        # end_idx += -1
+      end
+
+      return unless @current.positive?
+
+      @current += -1
+      @needs_refresh = true
+    end
+
+    def handle_key_down
+      @moving = true
+
+      # This needs work
+      if end_idx < @processes.length && @processes.length > @win.maxy
+        # @start_idx += 1
+        # end_idx += 1
+      end
+
+      return unless @current < @processes.length - 1
+
+      @current += 1
+      @needs_refresh = true
+    end
+
+    def render_process(process, idx)
+      if idx.zero?
+        @win.attron(Curses.color_pair(2))
+        @win.addstr(process[0..Curses.cols - 1].ljust(Curses.cols))
+        @win.attroff(Curses.color_pair(2))
+      elsif idx == @current
+        @win.attron(Curses.color_pair(1))
+        @win.addstr(process[0..Curses.cols - 1].ljust(Curses.cols))
+        @win.attroff(Curses.color_pair(1))
+      else
+        @win.addstr(process[0..Curses.cols - 1].ljust(Curses.cols))
+      end
     end
   end
 end

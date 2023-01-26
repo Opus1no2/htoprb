@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Htoprb
   class Render
     include Curses
@@ -15,12 +17,10 @@ module Htoprb
     end
 
     def init
-      begin
-        @process_list.render
-      rescue => exception
-        Curses.close_screen
-        p exception
-      end
+      @process_list.render
+    rescue StandardError => e
+      Curses.close_screen
+      p e
     end
   end
 end
