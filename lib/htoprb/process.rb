@@ -21,18 +21,18 @@ module Htoprb
       process_parts = @process.split(' ')
 
       pid   = process_parts[0].rjust(column_widths['pid'])
-      user  = process_parts[1][0..column_widths['user']].ljust(column_widths['user'])
+      user  = process_parts[1][0..column_widths['user']].ljust(column_widths['user'] + 1)
       pri   = process_parts[2].rjust(column_widths['pri'])
       ni    = process_parts[3].rjust(column_widths['ni'])
       rss   = process_parts[4].rjust(column_widths['rss'])
       state = process_parts[5].rjust(column_widths['state'])
       cpu   = process_parts[6].rjust(column_widths['%cpu'])
       mem   = process_parts[7].rjust(column_widths['%mem'])
-      time  = process_parts[8][0..column_widths['time']]
+      time  = process_parts[8].rjust(column_widths['time'])
 
       command = process_parts[9]
 
-      (pid + user + pri + ni + rss + state + cpu + mem + time + command)[0..Curses.cols - 1].ljust(Curses.cols)
+      "#{pid}  #{user}  #{pri}  #{ni}  #{rss}  #{state}  #{cpu}  #{mem}  #{time}  #{command}"[0..Curses.cols - 1].ljust(Curses.cols)
     end
 
     def render

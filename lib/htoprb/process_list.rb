@@ -25,7 +25,7 @@ module Htoprb
       @processes = []
       @needs_refresh = true
       @moving = false
-      @timeout = 1000 # make configurable
+      @timeout = 2000 # make configurable
       @column_widths = {}
       @process = process
 
@@ -147,7 +147,7 @@ module Htoprb
       @column_widths['user'] = 10
       @column_widths['%cpu'] = 5
       @column_widths['%mem'] = 5
-      @column_widths['state'] = 2
+      @column_widths['state'] = 3
       @column_widths['time'] = 8
 
       max_pid = processes[1..].map { |process| process.split(' ')[0] }.max_by(&:length).length.to_i
