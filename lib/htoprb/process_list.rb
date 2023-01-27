@@ -6,18 +6,28 @@ module Htoprb
     attr_accessor :start_idx, :win, :current, :processes, :timeout
 
     FRAMERATE = 1.0 / 24.0
+    COLS = {
+      'pid' => 'PID',
+      'user' => 'USER',
+      'pri' => 'PRI',
+      'ni' => 'NI',
+      'rss' => 'RES',
+      'state' => 'S',
+      '%cpu' => 'CPU%',
+      '%mem' => 'MEM%',
+      'time' => 'Time',
+      'command' => 'Command'
+    }.freeze
 
-    def initialize
+    def initialize(process = Htoprb::Process)
       @start_idx = 0
       @current = 1
       @processes = []
       @needs_refresh = true
       @moving = false
-      @timeout = 1000
-
-      Curses.start_color
-      Curses.init_pair(1, 0, 6)
-      Curses.init_pair(2, 0, 2)
+      @timeout = 1000 # make configurable
+      @column_widths = {}
+      @process = process
 
       init_window
     end
@@ -31,12 +41,17 @@ module Htoprb
     end
 
     def running_processes
-      stdout, _stderr, _wait_thr = Open3.capture3('ps', 'aux')
+      stdout, _stderr, _wait_thr = Open3.capture3('ps', 'axr', '-o', column_names)
       stdout.split("\n")
+    end
+
+    def column_names
+      COLS.map { |k, v| "#{k}=#{v}" }.join(',')
     end
 
     def render
       @processes = running_processes
+      calculate_column_widths(@processes)
 
       old_time = Time.now
 
@@ -75,7 +90,12 @@ module Htoprb
     def render_process_list(start_idx, end_idx)
       @processes[start_idx..end_idx].each.with_index do |process, idx|
         @win.setpos(idx, 0)
-        render_process(process, idx)
+
+        p = @process.new(@win, process, @column_widths)
+        p.selected = true if @current == idx
+        p.header = true if idx.zero?
+        p.render
+
         @win.clrtoeol
       end
 
@@ -121,18 +141,20 @@ module Htoprb
       @needs_refresh = true
     end
 
-    def render_process(process, idx)
-      if idx.zero?
-        @win.attron(Curses.color_pair(2))
-        @win.addstr(process[0..Curses.cols - 1].ljust(Curses.cols))
-        @win.attroff(Curses.color_pair(2))
-      elsif idx == @current
-        @win.attron(Curses.color_pair(1))
-        @win.addstr(process[0..Curses.cols - 1].ljust(Curses.cols))
-        @win.attroff(Curses.color_pair(1))
-      else
-        @win.addstr(process[0..Curses.cols - 1].ljust(Curses.cols))
-      end
+    def calculate_column_widths(processes)
+      @column_widths['pri'] = 2
+      @column_widths['ni'] = 2
+      @column_widths['user'] = 10
+      @column_widths['%cpu'] = 5
+      @column_widths['%mem'] = 5
+      @column_widths['state'] = 2
+      @column_widths['time'] = 8
+
+      max_pid = processes[1..].map { |process| process.split(' ')[0] }.max_by(&:length).length.to_i
+      max_res = processes[1..].map { |process| process.split(' ')[4] }.max_by(&:length).length.to_i
+
+      @column_widths['pid'] = max_pid
+      @column_widths['rss'] = max_res
     end
   end
 end

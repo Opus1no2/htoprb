@@ -4,6 +4,7 @@ require_relative 'htoprb/version'
 
 require 'curses'
 require 'open3'
+require 'htoprb/process'
 require 'htoprb/process_list'
 require 'htoprb/render'
 
@@ -13,6 +14,6 @@ module Htoprb
   def self.init
     Htoprb::Render.new.init
   rescue StandardError => e
-    p e
+    e.backtrace
   end
 end

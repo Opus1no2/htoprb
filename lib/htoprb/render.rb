@@ -20,7 +20,8 @@ module Htoprb
       @process_list.render
     rescue StandardError => e
       Curses.close_screen
-      p e
+      puts e.full_message
+      puts e.backtrace.join("\n")
     end
   end
 end
