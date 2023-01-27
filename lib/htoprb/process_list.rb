@@ -15,7 +15,7 @@ module Htoprb
       'state' => 'S',
       '%cpu' => 'CPU%',
       '%mem' => 'MEM%',
-      'time' => 'Time',
+      'etime' => 'Time',
       'command' => 'Command'
     }.freeze
 
@@ -41,8 +41,21 @@ module Htoprb
     end
 
     def running_processes
-      stdout, _stderr, _wait_thr = Open3.capture3('ps', 'axr', '-o', column_names)
+      stdout, _stderr, _wait_thr = Open3.capture3('ps', ps_options, column_names)
       stdout.split("\n")
+    end
+
+    def ps_options
+      os = Gem::Platform.local.os
+
+      case os
+      when 'linux'
+        'axo'
+      when 'darwin'
+        'axr -o'
+      else
+        raise Error, "unsupported platform os: #{os}"
+      end
     end
 
     def column_names
@@ -150,8 +163,8 @@ module Htoprb
       @column_widths['state'] = 3
       @column_widths['time'] = 8
 
-      max_pid = processes[1..].map { |process| process.split(' ')[0] }.max_by(&:length).length.to_i
-      max_res = processes[1..].map { |process| process.split(' ')[4] }.max_by(&:length).length.to_i
+      max_pid = processes[1..].map { |process| process.split[0] }.max_by(&:length).length.to_i
+      max_res = processes[1..].map { |process| process.split[4] }.max_by(&:length).length.to_i
 
       @column_widths['pid'] = max_pid
       @column_widths['rss'] = max_res

@@ -18,7 +18,7 @@ module Htoprb
     end
 
     def create_process_string
-      process_parts = @process.split(' ')
+      process_parts = @process.split
 
       pid   = process_parts[0].rjust(column_widths['pid'])
       user  = process_parts[1][0..column_widths['user']].ljust(column_widths['user'] + 1)
@@ -29,10 +29,14 @@ module Htoprb
       cpu   = process_parts[6].rjust(column_widths['%cpu'])
       mem   = process_parts[7].rjust(column_widths['%mem'])
       time  = process_parts[8].rjust(column_widths['time'])
-
-      command = process_parts[9]
+      command = extract_command(@process)
 
       "#{pid}  #{user}  #{pri}  #{ni}  #{rss}  #{state}  #{cpu}  #{mem}  #{time}  #{command}"[0..Curses.cols - 1].ljust(Curses.cols)
+    end
+
+    def extract_command(process)
+      command_match = process.match(/\d{2}:\d{2} (.*)/)
+      command_match ? command_match.captures.first : 'Command'
     end
 
     def render
