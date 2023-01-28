@@ -2,7 +2,9 @@
 
 module Htoprb
   class Platform
-    attr_accessor :process_list
+    def initialize(process)
+      @process = process
+    end
 
     def process_list
       platform.process_list

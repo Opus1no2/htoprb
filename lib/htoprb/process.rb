@@ -4,20 +4,12 @@ module Htoprb
   class Process
     attr_accessor :win, :process, :column_widths, :selected, :header
 
-    def initialize(win, process, column_widths)
-      @win = win
+    def initialize(process, column_widths)
       @process = process
       @column_widths = column_widths
-      @selected = false
-      @header = false
-      @selected = false
-
-      Curses.start_color
-      Curses.init_pair(1, 0, 6)
-      Curses.init_pair(2, 0, 2)
     end
 
-    def create_process_string
+    def to_s
       process_parts = @process.split
 
       pid   = process_parts[0].rjust(column_widths['pid'])
@@ -31,41 +23,13 @@ module Htoprb
       time  = process_parts[8].rjust(column_widths['time'])
       command = extract_command(@process)
 
-      "#{pid}  #{user}  #{pri}  #{ni}  #{rss}  #{state}  #{cpu}  #{mem}  #{time}  #{command}"[0..Curses.cols - 1].ljust(Curses.cols)
+      [pid, user, pri, ni, rss, state, cpu, mem, time, command].join('  ')[0..Curses.cols].ljust(Curses.cols)
     end
 
     def extract_command(process)
       # This is brittle
       command_match = process.match(/\d{1,}:\d{2}.\d{2} (.*)/)
       command_match ? command_match.captures.first : 'Command'
-    end
-
-    def render
-      process_str = create_process_string
-
-      if header?
-        @win.attron(Curses.color_pair(2))
-        @win.addstr(process_str)
-        @win.attroff(Curses.color_pair(2))
-        return
-      end
-
-      if selected?
-        @win.attron(Curses.color_pair(1))
-        @win.addstr(process_str)
-        @win.attroff(Curses.color_pair(1))
-        return
-      end
-
-      @win.addstr(process_str)
-    end
-
-    def header?
-      @header
-    end
-
-    def selected?
-      @selected
     end
   end
 end

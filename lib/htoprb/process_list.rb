@@ -6,8 +6,10 @@ module Htoprb
     FRAMERATE = 1.0 / 24.0
 
     def initialize(process = Process)
-      @start_idx = 0
-      @current = 1
+      super(process)
+
+      @start_idx = 1
+      @current = 0
       @needs_refresh = true
       @moving = false
       @timeout = 2000 # make configurable
@@ -17,6 +19,10 @@ module Htoprb
       @platform = platform
 
       init_window
+
+      Curses.start_color
+      Curses.init_pair(1, 0, 6)
+      Curses.init_pair(2, 0, 2)
     end
 
     def init_window
@@ -69,14 +75,28 @@ module Htoprb
       end
     end
 
-    def render_process_list
-      @process_list[@start_idx..end_idx].each.with_index do |proc, idx|
-        @win.setpos(idx, 0)
+    def render_header(header_str)
+      @win.setpos(0, 0)
+      @win.attron(Curses.color_pair(2))
+      @win << @process.new(header_str, @column_widths).to_s
+      @win.attroff(Curses.color_pair(2))
+    end
 
-        process = @process.new(@win, proc, @column_widths)
-        process.selected = true if @current == idx
-        process.header = true if idx.zero?
-        process.render
+    def render_process_list
+      render_header(@process_list[0])
+
+      @process_list[@start_idx..end_idx].each.with_index do |proc, idx|
+        @win.setpos(idx + 1, 0)
+
+        process = @process.new(proc, @column_widths)
+
+        if @current == idx
+          @win.attron(Curses.color_pair(1))
+          @win << process.to_s
+          @win.attroff(Curses.color_pair(1))
+        else
+          @win << process.to_s
+        end
 
         @win.clrtoeol
       end
