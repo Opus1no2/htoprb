@@ -35,7 +35,8 @@ module Htoprb
     end
 
     def extract_command(process)
-      command_match = process.match(/\d{2}:\d{2} (.*)/)
+      # This is brittle
+      command_match = process.match(/\d{1,}:\d{2}.\d{2} (.*)/)
       command_match ? command_match.captures.first : 'Command'
     end
 

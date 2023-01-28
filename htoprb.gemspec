@@ -30,6 +30,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   # Uncomment to register a new dependency of your gem
+  spec.add_development_dependency 'pry', '~> 0.14.1'
   spec.add_development_dependency 'rubocop', '1.43.0'
 
   spec.add_dependency 'curses', '1.4.4'

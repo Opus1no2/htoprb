@@ -2,32 +2,19 @@
 
 module Htoprb
   # TODO: separate process list logic from ncurses logic
-  class ProcessList
-    attr_accessor :start_idx, :win, :current, :processes, :timeout
-
+  class ProcessList < Platform
     FRAMERATE = 1.0 / 24.0
-    COLS = {
-      'pid' => 'PID',
-      'user' => 'USER',
-      'pri' => 'PRI',
-      'ni' => 'NI',
-      'rss' => 'RES',
-      'state' => 'S',
-      '%cpu' => 'CPU%',
-      '%mem' => 'MEM%',
-      'etime' => 'Time',
-      'command' => 'Command'
-    }.freeze
 
-    def initialize(process = Htoprb::Process)
+    def initialize(process = Process)
       @start_idx = 0
       @current = 1
-      @processes = []
       @needs_refresh = true
       @moving = false
       @timeout = 2000 # make configurable
       @column_widths = {}
       @process = process
+      @process_list = []
+      @platform = platform
 
       init_window
     end
@@ -40,31 +27,13 @@ module Htoprb
       @win.timeout = 0
     end
 
-    def running_processes
-      stdout, _stderr, _wait_thr = Open3.capture3('ps', ps_options, column_names)
-      stdout.split("\n")
-    end
-
-    def ps_options
-      os = Gem::Platform.local.os
-
-      case os
-      when 'linux'
-        'axo'
-      when 'darwin'
-        'axr -o'
-      else
-        raise Error, "unsupported platform os: #{os}"
-      end
-    end
-
-    def column_names
-      COLS.map { |k, v| "#{k}=#{v}" }.join(',')
+    def hydrate_process_list
+      @process_list = process_list
     end
 
     def render
-      @processes = running_processes
-      calculate_column_widths(@processes)
+      hydrate_process_list
+      calculate_column_widths
 
       old_time = Time.now
 
@@ -80,7 +49,7 @@ module Htoprb
         old_time = new_time if @moving
 
         if (new_time - old_time) * 1000.0 > @timeout
-          @processes = running_processes
+          hydrate_process_list
           @needs_refresh = true
           old_time = new_time
         end
@@ -96,18 +65,18 @@ module Htoprb
 
         sleep(FRAMERATE) unless @needs_refresh
 
-        render_process_list(@start_idx, end_idx) if @needs_refresh
+        render_process_list if @needs_refresh
       end
     end
 
-    def render_process_list(start_idx, end_idx)
-      @processes[start_idx..end_idx].each.with_index do |process, idx|
+    def render_process_list
+      @process_list[@start_idx..end_idx].each.with_index do |proc, idx|
         @win.setpos(idx, 0)
 
-        p = @process.new(@win, process, @column_widths)
-        p.selected = true if @current == idx
-        p.header = true if idx.zero?
-        p.render
+        process = @process.new(@win, proc, @column_widths)
+        process.selected = true if @current == idx
+        process.header = true if idx.zero?
+        process.render
 
         @win.clrtoeol
       end
@@ -117,18 +86,18 @@ module Htoprb
     end
 
     def end_idx
-      @end_idx = if @processes.length > Curses.lines - 2
-                   Curses.lines - 2
-                 else
-                   @processes.length - 1
-                 end
+      if @process_list.length > Curses.lines - 2
+        Curses.lines - 2
+      else
+        @process_list.length - 1
+      end
     end
 
     def handle_key_up
       @moving = true
 
       # This needs work
-      if @start_idx.positive? && @processes.length > Curses.lines
+      if @start_idx.positive? && @process_list.length > Curses.lines
         # @start_idx += -1
         # end_idx += -1
       end
@@ -143,18 +112,18 @@ module Htoprb
       @moving = true
 
       # This needs work
-      if end_idx < @processes.length && @processes.length > @win.maxy
+      if end_idx < @process_list.length && @process_list.length > @win.maxy
         # @start_idx += 1
         # end_idx += 1
       end
 
-      return unless @current < @processes.length - 1
+      return unless @current < @process_list.length - 1
 
       @current += 1
       @needs_refresh = true
     end
 
-    def calculate_column_widths(processes)
+    def calculate_column_widths
       @column_widths['pri'] = 2
       @column_widths['ni'] = 2
       @column_widths['user'] = 10
@@ -163,8 +132,10 @@ module Htoprb
       @column_widths['state'] = 3
       @column_widths['time'] = 8
 
-      max_pid = processes[1..].map { |process| process.split[0] }.max_by(&:length).length.to_i
-      max_res = processes[1..].map { |process| process.split[4] }.max_by(&:length).length.to_i
+      max_pid = @process_list[1..].map { |process| process.split[0] }
+                                  .max_by(&:length).length.to_i
+      max_res = @process_list[1..].map { |process| process.split[4] }
+                                  .max_by(&:length).length.to_i
 
       @column_widths['pid'] = max_pid
       @column_widths['rss'] = max_res
