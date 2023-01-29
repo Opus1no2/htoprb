@@ -9,11 +9,10 @@ module Htoprb
       super(process)
 
       @start_idx = 1
-      @current = 0
+      @current = 1
       @needs_refresh = true
       @moving = false
       @timeout = 1000 # make configurable
-      @column_widths = {}
       @process_list = []
 
       init_window
@@ -31,13 +30,9 @@ module Htoprb
       @win.timeout = 0
     end
 
-    def hydrate_process_list
-      @process_list = process_list
-    end
-
     def render
-      hydrate_process_list
-      calculate_column_widths
+      refresh_process_list
+      render_header
 
       old_time = Time.now
 
@@ -53,7 +48,7 @@ module Htoprb
         old_time = new_time if @moving
 
         if (new_time - old_time) * 1000.0 > @timeout
-          hydrate_process_list
+          refresh_process_list
           @needs_refresh = true
           old_time = new_time
         end
@@ -76,22 +71,20 @@ module Htoprb
     def render_header
       @win.setpos(0, 0)
       @win.attron(Curses.color_pair(2))
-      @win << @process_list.first.column_str(@column_widths)
+      @win << @process_list.first.to_s
       @win.attroff(Curses.color_pair(2))
     end
 
     def render_process_list
-      render_header
+      @process_list[@start_idx..end_idx].each.with_index(1) do |process, idx|
+        @win.setpos(idx, 0)
 
-      @process_list[@start_idx..end_idx].each.with_index do |process, idx|
-        @win.setpos(idx + 1, 0)
-
-        if @current == idx
+        if @current == process.id
           @win.attron(Curses.color_pair(1))
-          @win << process.column_str(@column_widths)
+          @win << process.to_s
           @win.attroff(Curses.color_pair(1))
         else
-          @win << process.column_str(@column_widths)
+          @win << process.to_s
         end
 
         @win.clrtoeol
@@ -102,11 +95,11 @@ module Htoprb
     end
 
     def end_idx
-      if @process_list.length > Curses.lines - 2
-        Curses.lines - 2
-      else
-        @process_list.length - 1
-      end
+      @end_idx ||= if @process_list.length > Curses.lines - 2
+                     Curses.lines - 2
+                   else
+                     @process_list.length - 1
+                   end
     end
 
     def handle_key_up
@@ -118,7 +111,7 @@ module Htoprb
         # end_idx += -1
       end
 
-      return unless @current.positive?
+      return if @current == 1
 
       @current += -1
       @needs_refresh = true
@@ -137,27 +130,6 @@ module Htoprb
 
       @current += 1
       @needs_refresh = true
-    end
-
-    def calculate_column_widths
-      @column_widths['pri'] = 2
-      @column_widths['ni'] = 2
-      @column_widths['user'] = 10
-      @column_widths['%cpu'] = 5
-      @column_widths['%mem'] = 5
-      @column_widths['state'] = 3
-      @column_widths['time'] = 8
-
-      @column_widths['pid'] = max_pid
-      @column_widths['rss'] = max_res
-    end
-
-    def max_pid
-      @process_list[1..].map { |p| p.process['pid'] }.max_by(&:length).length
-    end
-
-    def max_res
-      @process_list[1..].map { |p| p.process['rss'] }.max_by(&:length).length
     end
   end
 end

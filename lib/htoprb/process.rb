@@ -2,15 +2,17 @@
 
 module Htoprb
   class Process
-    attr_accessor :process
+    attr_accessor :id, :process
 
-    def initialize(process)
+    def initialize(process, id)
       @process = process
+      @id = id
       @selected = false
+      @padded_row = ''
     end
 
-    def column_str(column_widths)
-      [
+    def generate_column_widths(column_widths)
+      @padded_row = [
         @process['pid'].rjust(column_widths['pid']),
         @process['user'][0..column_widths['user']].ljust(column_widths['user'] + 1),
         @process['pri'].rjust(column_widths['pri']),
@@ -22,6 +24,10 @@ module Htoprb
         @process['time'].rjust(column_widths['time']),
         @process['command']
       ].join('  ')[0..Curses.cols].ljust(Curses.cols)
+    end
+
+    def to_s
+      @padded_row
     end
   end
 end
