@@ -3,9 +3,10 @@
 module Htoprb
   # TODO: separate process list logic from ncurses logic
   class ProcessList < ProcessListBase
-    FRAMERATE = 1.0 / 24.0
+    attr_reader :win, :timeout
+    attr_accessor :needs_refresh, :moving
 
-    def initialize(process = Process)
+    def initialize(process = Process, window = Window.new)
       super(process)
 
       @start_idx = 1
@@ -13,58 +14,12 @@ module Htoprb
       @needs_refresh = true
       @moving = false
       @timeout = 1000 # make configurable
-
-      init_window
-
-      Curses.start_color
-      Curses.init_pair(1, 0, 6)
-      Curses.init_pair(2, 0, 2)
+      @win = window.win
     end
 
-    def init_window
-      @win = Curses::Window.new(Curses.lines, Curses.cols, 0, 0)
-      @win.scrollok(true)
-      @win.setscrreg(Curses.lines, Curses.cols)
-      @win.keypad(true)
-      @win.timeout = 0
-    end
-
-    def render
+    def init
       refresh_process_list
       render_header
-
-      old_time = Time.now
-
-      loop do
-        ch = @win.getch
-
-        break if ch == 'q'
-
-        new_time = Time.now
-
-        # This pauses the entire from updating while navigating via up/down arrows
-        # In the future - this should pause the list but allow specific status to update
-        old_time = new_time if @moving
-
-        if (new_time - old_time) * 1000.0 > @timeout
-          refresh_process_list
-          @needs_refresh = true
-          old_time = new_time
-        end
-
-        case ch
-        when Curses::KEY_UP
-          handle_key_up
-        when Curses::KEY_DOWN
-          handle_key_down
-        when nil
-          @moving = false
-        end
-
-        sleep(FRAMERATE) unless @needs_refresh
-
-        render_process_list if @needs_refresh
-      end
     end
 
     def render_header
