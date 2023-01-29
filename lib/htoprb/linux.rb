@@ -16,7 +16,7 @@ module Htoprb
     }.freeze
 
     def process_list
-      stdout, _stderr, _wait_thr = Open3.capture3('ps', 'axo', column_names)
+      stdout, _stderr, _wait_thr = Open3.capture3('ps', 'axo', column_names, '--sort', '-%cpu')
       stdout.split("\n")
     end
 

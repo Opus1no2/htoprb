@@ -2,34 +2,26 @@
 
 module Htoprb
   class Process
-    attr_accessor :win, :process, :column_widths, :selected, :header
+    attr_accessor :process
 
-    def initialize(process, column_widths)
+    def initialize(process)
       @process = process
-      @column_widths = column_widths
+      @selected = false
     end
 
-    def to_s
-      process_parts = @process.split
-
-      pid   = process_parts[0].rjust(column_widths['pid'])
-      user  = process_parts[1][0..column_widths['user']].ljust(column_widths['user'] + 1)
-      pri   = process_parts[2].rjust(column_widths['pri'])
-      ni    = process_parts[3].rjust(column_widths['ni'])
-      rss   = process_parts[4].rjust(column_widths['rss'])
-      state = process_parts[5].rjust(column_widths['state'])
-      cpu   = process_parts[6].rjust(column_widths['%cpu'])
-      mem   = process_parts[7].rjust(column_widths['%mem'])
-      time  = process_parts[8].rjust(column_widths['time'])
-      command = extract_command(@process)
-
-      [pid, user, pri, ni, rss, state, cpu, mem, time, command].join('  ')[0..Curses.cols].ljust(Curses.cols)
-    end
-
-    def extract_command(process)
-      # This is brittle
-      command_match = process.match(/\d{1,}:\d{2}.\d{2} (.*)/)
-      command_match ? command_match.captures.first : 'Command'
+    def column_str(column_widths)
+      [
+        @process['pid'].rjust(column_widths['pid']),
+        @process['user'][0..column_widths['user']].ljust(column_widths['user'] + 1),
+        @process['pri'].rjust(column_widths['pri']),
+        @process['ni'].rjust(column_widths['ni']),
+        @process['rss'].rjust(column_widths['rss']),
+        @process['state'].rjust(column_widths['state']),
+        @process['%cpu'].rjust(column_widths['%cpu']),
+        @process['%mem'].rjust(column_widths['%mem']),
+        @process['time'].rjust(column_widths['time']),
+        @process['command']
+      ].join('  ')[0..Curses.cols].ljust(Curses.cols)
     end
   end
 end

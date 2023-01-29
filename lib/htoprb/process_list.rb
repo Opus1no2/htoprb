@@ -14,7 +14,6 @@ module Htoprb
       @moving = false
       @timeout = 2000 # make configurable
       @column_widths = {}
-      @process = process
       @process_list = []
       @platform = platform
 
@@ -75,27 +74,25 @@ module Htoprb
       end
     end
 
-    def render_header(header_str)
+    def render_header
       @win.setpos(0, 0)
       @win.attron(Curses.color_pair(2))
-      @win << @process.new(header_str, @column_widths).to_s
+      @win << @process_list.first.column_str(@column_widths)
       @win.attroff(Curses.color_pair(2))
     end
 
     def render_process_list
-      render_header(@process_list[0])
+      render_header
 
-      @process_list[@start_idx..end_idx].each.with_index do |proc, idx|
+      @process_list[@start_idx..end_idx].each.with_index do |process, idx|
         @win.setpos(idx + 1, 0)
-
-        process = @process.new(proc, @column_widths)
 
         if @current == idx
           @win.attron(Curses.color_pair(1))
-          @win << process.to_s
+          @win << process.column_str(@column_widths)
           @win.attroff(Curses.color_pair(1))
         else
-          @win << process.to_s
+          @win << process.column_str(@column_widths)
         end
 
         @win.clrtoeol
@@ -152,13 +149,16 @@ module Htoprb
       @column_widths['state'] = 3
       @column_widths['time'] = 8
 
-      max_pid = @process_list[1..].map { |process| process.split[0] }
-                                  .max_by(&:length).length.to_i
-      max_res = @process_list[1..].map { |process| process.split[4] }
-                                  .max_by(&:length).length.to_i
-
       @column_widths['pid'] = max_pid
       @column_widths['rss'] = max_res
+    end
+
+    def max_pid
+      @process_list[1..].map { |p| p.process['pid'] }.max_by(&:length).length
+    end
+
+    def max_res
+      @process_list[1..].map { |p| p.process['rss'] }.max_by(&:length).length
     end
   end
 end
