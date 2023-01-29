@@ -13,7 +13,6 @@ module Htoprb
       @needs_refresh = true
       @moving = false
       @timeout = 1000 # make configurable
-      @process_list = []
 
       init_window
 
@@ -71,7 +70,7 @@ module Htoprb
     def render_header
       @win.setpos(0, 0)
       @win.attron(Curses.color_pair(2))
-      @win << @process_list.first.to_s
+      @win << @process_list.first.str
       @win.attroff(Curses.color_pair(2))
     end
 
@@ -81,10 +80,10 @@ module Htoprb
 
         if @current == process.id
           @win.attron(Curses.color_pair(1))
-          @win << process.to_s
+          @win << process.str
           @win.attroff(Curses.color_pair(1))
         else
-          @win << process.to_s
+          @win << process.str
         end
 
         @win.clrtoeol
@@ -95,8 +94,8 @@ module Htoprb
     end
 
     def end_idx
-      @end_idx ||= if @process_list.length > Curses.lines - 2
-                     Curses.lines - 2
+      @end_idx ||= if @process_list.length >= Curses.lines
+                     Curses.lines
                    else
                      @process_list.length - 1
                    end
@@ -105,13 +104,13 @@ module Htoprb
     def handle_key_up
       @moving = true
 
+      return if @current == 1
+
       # This needs work
       if @start_idx.positive? && @process_list.length > Curses.lines
         # @start_idx += -1
         # end_idx += -1
       end
-
-      return if @current == 1
 
       @current += -1
       @needs_refresh = true
@@ -120,15 +119,16 @@ module Htoprb
     def handle_key_down
       @moving = true
 
+      return if @current == @process_list.length - 1
+
+      @current += 1
+
       # This needs work
       if end_idx < @process_list.length && @process_list.length > @win.maxy
         # @start_idx += 1
         # end_idx += 1
       end
 
-      return unless @current < @process_list.length - 1
-
-      @current += 1
       @needs_refresh = true
     end
   end
