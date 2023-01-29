@@ -23,4 +23,19 @@ module Htoprb
     puts e.full_message
     puts e.backtrace.join("\n")
   end
+
+  def self.platform
+    @platform ||= case os
+                  when 'linux'
+                    Htoprb::Linux.new
+                  when 'darwin'
+                    Htoprb::Darwin.new
+                  else
+                    raise StandardError, '[htoprb] - unsupported platform'
+                  end
+  end
+
+  def self.os
+    @os ||= Gem::Platform.local.os
+  end
 end

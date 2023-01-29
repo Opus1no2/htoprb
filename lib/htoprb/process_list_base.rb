@@ -6,7 +6,6 @@ module Htoprb
     attr_accessor :process, :id
 
     def initialize(process,
-                   platform = Platform.instance,
                    serializer = ProcessSerializer.instance)
 
       @process = process
@@ -15,9 +14,13 @@ module Htoprb
       @process_list = []
     end
 
+    def platform
+      @platform ||= Htoprb.platform
+    end
+
     def refresh_process_list
       @process_list = @serializer
-                      .serialized_processes(@platform.platform.process_list)
+                      .serialized_processes(platform.process_list)
                       .map.with_index do |proc, id|
         @process.new(proc, id)
       end
