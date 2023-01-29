@@ -4,10 +4,12 @@ require_relative 'htoprb/version'
 
 require 'curses'
 require 'open3'
+require 'singleton'
 require 'htoprb/platform'
 require 'htoprb/linux'
 require 'htoprb/darwin'
 require 'htoprb/process'
+require 'htoprb/process_list_base'
 require 'htoprb/process_list'
 require 'htoprb/render'
 

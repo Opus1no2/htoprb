@@ -2,7 +2,7 @@
 
 module Htoprb
   # TODO: separate process list logic from ncurses logic
-  class ProcessList < Platform
+  class ProcessList < ProcessListBase
     FRAMERATE = 1.0 / 24.0
 
     def initialize(process = Process)
@@ -12,10 +12,9 @@ module Htoprb
       @current = 0
       @needs_refresh = true
       @moving = false
-      @timeout = 2000 # make configurable
+      @timeout = 1000 # make configurable
       @column_widths = {}
       @process_list = []
-      @platform = platform
 
       init_window
 
