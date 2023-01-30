@@ -8,8 +8,11 @@ module Htoprb
 
     attr_reader :process_list
 
-    def initialize(process_list = ProcessList.new)
-      @process_list = process_list
+    def initialize(process_list = ProcessList,
+                   header = Header)
+
+      @header = header.new
+      @process_list = process_list.new(@header)
 
       noecho
       crmode
@@ -19,11 +22,14 @@ module Htoprb
       start_color
       init_pair(1, 0, 6)
       init_pair(2, 0, 2)
+
       init_screen
     end
 
     def init
-      process_list.init
+      @process_list.init
+      @header.update_stats(@process_list.header_stats)
+
       old_time = Time.now
 
       loop do
@@ -54,7 +60,10 @@ module Htoprb
 
         sleep(FRAMERATE) unless process_list.needs_refresh
 
-        process_list.render_process_list if process_list.needs_refresh
+        if process_list.needs_refresh
+          process_list.render_process_list
+          process_list.update_header_stats
+        end
       end
     end
   end

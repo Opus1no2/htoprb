@@ -9,6 +9,7 @@ require 'htoprb/linux'
 require 'htoprb/darwin'
 require 'htoprb/screen_manager'
 require 'htoprb/window'
+require 'htoprb/header'
 require 'htoprb/process_serializer'
 require 'htoprb/process'
 require 'htoprb/process_list_base'
@@ -20,6 +21,7 @@ module Htoprb
   def self.init
     Htoprb::ScreenManager.new.init
   rescue StandardError => e
+    Curses.close_screen
     puts e.full_message
     puts e.backtrace.join("\n")
   end

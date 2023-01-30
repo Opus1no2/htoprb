@@ -35,7 +35,7 @@ module Htoprb
         process['%mem'].rjust(column_widths['%mem']),
         process['time'].rjust(column_widths['time']),
         process['command']
-      ].join('  ')[0..Curses.cols].ljust(Curses.cols)
+      ].join('  ')[0..Curses.cols - 1].ljust(Curses.cols)
     end
   end
 end
