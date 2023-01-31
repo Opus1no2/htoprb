@@ -82,7 +82,7 @@ module Htoprb
       @process_list
     end
 
-    def column_widths
+    def default_column_widths
       {
         'pri' => 2,
         'ni' => 2,
@@ -91,7 +91,11 @@ module Htoprb
         '%mem' => 5,
         'state' => 3,
         'time' => 8
-      }.merge('pid' => max_pid, 'rss' => max_res)
+      }
+    end
+
+    def column_widths
+      default_column_widths.merge('pid' => max_pid, 'rss' => max_res)
     end
 
     def max_pid
