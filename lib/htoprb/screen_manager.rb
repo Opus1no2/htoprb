@@ -20,15 +20,15 @@ module Htoprb
       stdscr.scrollok(true)
 
       start_color
-      init_pair(1, 0, 6)
-      init_pair(2, 0, 2)
+      init_pair(COLOR_CYAN, COLOR_BLACK, COLOR_CYAN)
+      init_pair(COLOR_GREEN, COLOR_BLACK, COLOR_GREEN)
 
       init_screen
     end
 
     def init
       @process_list.init
-      @header.update_stats(@process_list.header_stats)
+      @header.update_stats
 
       old_time = Time.now
 

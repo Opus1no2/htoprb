@@ -35,9 +35,9 @@ module Htoprb
 
     def render_column_header
       @win.setpos(@column_header_y, 0)
-      @win.attron(Curses.color_pair(2))
+      @win.attron(Curses.color_pair(Curses::COLOR_GREEN))
       @win << @process_list.first.str
-      @win.attroff(Curses.color_pair(2))
+      @win.attroff(Curses.color_pair(Curses::COLOR_GREEN))
     end
 
     def render_process_list
@@ -45,9 +45,9 @@ module Htoprb
         @win.setpos(idx, 0)
 
         if @current == process.id
-          @win.attron(Curses.color_pair(1))
+          @win.attron(Curses.color_pair(Curses::COLOR_CYAN))
           @win << process.str
-          @win.attroff(Curses.color_pair(1))
+          @win.attroff(Curses.color_pair(Curses::COLOR_CYAN))
         else
           @win << process.str
         end
