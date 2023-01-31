@@ -20,6 +20,11 @@ module Htoprb
       stdout.split("\n")
     end
 
+    def uptime
+      stdout, _stderr, _wait_thr = Open3.capture3('uptime')
+      stdout
+    end
+
     def column_names
       COLUMN_MAPPING.map { |k, v| "#{k}=#{v}" }.join(',')
     end

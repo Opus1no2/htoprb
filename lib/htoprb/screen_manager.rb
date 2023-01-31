@@ -11,6 +11,7 @@ module Htoprb
     def initialize(process_list = ProcessList,
                    header = Header)
 
+      @timeout = 1500 # make configurable
       @header = header.new
       @process_list = process_list.new(@header)
 
@@ -43,7 +44,7 @@ module Htoprb
         # In the future - this should pause the list but allow specific status to update
         old_time = new_time if process_list.moving
 
-        if (new_time - old_time) * 1000.0 > process_list.timeout
+        if (new_time - old_time) * 1000.0 > @timeout
           process_list.refresh_process_list
           process_list.needs_refresh = true
           old_time = new_time

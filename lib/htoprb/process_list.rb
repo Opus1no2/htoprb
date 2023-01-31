@@ -1,10 +1,21 @@
 # frozen_string_literal: true
 
+require 'pry'
 module Htoprb
   # TODO: separate process list logic from ncurses logic
   class ProcessList
     attr_reader :win, :timeout, :header_stats
     attr_accessor :needs_refresh, :moving
+
+    DEFAULT_COLUMN_WIDTHS = {
+      'pri' => 2,
+      'ni' => 2,
+      'user' => 10,
+      '%cpu' => 5,
+      '%mem' => 5,
+      'state' => 3,
+      'time' => 8
+    }.freeze
 
     def initialize(header,
                    process = Process,
@@ -13,19 +24,15 @@ module Htoprb
 
       @needs_refresh = true
       @moving = false
-      @timeout = 1000 # make configurable
 
       @process = process
       @win = window.win
       @header = header
       @serializer = serializer
 
-      # clean this up
-      @column_header_y = @header.height + 1
-      @process_list_y  = @column_header_y + 1
-
-      @start_idx = @process_list_y
-      @current = @process_list_y
+      @y = @header.height + 1
+      @start_idx = @y + 1
+      @current = @y + 1
     end
 
     def init
@@ -35,18 +42,21 @@ module Htoprb
     end
 
     def update_header_stats
-      @header.total_tasks = @process_list.length
+      @header.tap do |h|
+        h.total_tasks = @process_list.length
+        h.total_running = @process_list.reject { |p| p.process['state'][/r/i].nil? }.length
+      end
     end
 
     def render_column_header
-      @win.setpos(@column_header_y, 0)
+      @win.setpos(@y, 0)
       @win.attron(Curses.color_pair(Curses::COLOR_GREEN))
       @win << @process_list.first.str
       @win.attroff(Curses.color_pair(Curses::COLOR_GREEN))
     end
 
     def render_process_list
-      @process_list[@start_idx..end_idx].each.with_index(@process_list_y) do |process, idx|
+      @process_list[@start_idx..end_idx].each.with_index(@y + 1) do |process, idx|
         @win.setpos(idx, 0)
 
         if @current == process.id
@@ -82,20 +92,8 @@ module Htoprb
       @process_list
     end
 
-    def default_column_widths
-      {
-        'pri' => 2,
-        'ni' => 2,
-        'user' => 10,
-        '%cpu' => 5,
-        '%mem' => 5,
-        'state' => 3,
-        'time' => 8
-      }
-    end
-
     def column_widths
-      default_column_widths.merge('pid' => max_pid, 'rss' => max_res)
+      DEFAULT_COLUMN_WIDTHS.merge('pid' => max_pid, 'rss' => max_res)
     end
 
     def max_pid
@@ -120,10 +118,10 @@ module Htoprb
       return if @current == @process_list_y
 
       # This needs work
-      if end_idx > (@process_list.length - 2) - @process_list_y
-        # @start_idx += -1
-        # @end_idx += -1
-      end
+      # if end_idx > (@process_list.length - 2) - @process_list_y
+      # @start_idx += -1
+      # @end_idx += -1
+      # end
 
       @current += -1
       @needs_refresh = true
@@ -140,7 +138,6 @@ module Htoprb
       end
 
       @current += 1
-
       @needs_refresh = true
     end
   end
