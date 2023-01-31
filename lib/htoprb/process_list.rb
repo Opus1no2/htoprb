@@ -2,25 +2,30 @@
 
 module Htoprb
   # TODO: separate process list logic from ncurses logic
-  class ProcessList < ProcessListBase
+  class ProcessList
     attr_reader :win, :timeout, :header_stats
     attr_accessor :needs_refresh, :moving
 
-    def initialize(header, process = Process, window = Window.instance)
-      super(process)
+    def initialize(header,
+                   process = Process,
+                   window = Window.instance,
+                   serializer = ProcessSerializer.instance)
 
-      @start_idx = 10
-      @current = 10
       @needs_refresh = true
       @moving = false
       @timeout = 1000 # make configurable
 
+      @process = process
       @win = window.win
       @header = header
+      @serializer = serializer
 
       # clean this up
       @column_header_y = @header.height + 1
       @process_list_y  = @column_header_y + 1
+
+      @start_idx = @process_list_y
+      @current = @process_list_y
     end
 
     def init
@@ -57,6 +62,44 @@ module Htoprb
 
       @win.refresh
       @needs_refresh = false
+    end
+
+    def platform
+      @platform ||= Htoprb.platform
+    end
+
+    def refresh_process_list
+      @process_list = @serializer
+                      .serialized_processes(platform.process_list)
+                      .map.with_index do |proc, id|
+        @process.new(proc, id)
+      end
+
+      @process_list.each do |process|
+        process.generate_column_widths(column_widths)
+      end
+
+      @process_list
+    end
+
+    def column_widths
+      {
+        'pri' => 2,
+        'ni' => 2,
+        'user' => 10,
+        '%cpu' => 5,
+        '%mem' => 5,
+        'state' => 3,
+        'time' => 8
+      }.merge('pid' => max_pid, 'rss' => max_res)
+    end
+
+    def max_pid
+      @process_list[1..].map { |p| p.process['pid'] }.max_by(&:length).length
+    end
+
+    def max_res
+      @process_list[1..].map { |p| p.process['rss'] }.max_by(&:length).length
     end
 
     def end_idx

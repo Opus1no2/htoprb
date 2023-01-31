@@ -12,7 +12,6 @@ require 'htoprb/window'
 require 'htoprb/header'
 require 'htoprb/process_serializer'
 require 'htoprb/process'
-require 'htoprb/process_list_base'
 require 'htoprb/process_list'
 
 module Htoprb
