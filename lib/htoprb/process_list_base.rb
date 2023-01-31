@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'pry'
 module Htoprb
   class ProcessListBase
     attr_accessor :process, :id
