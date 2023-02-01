@@ -6,8 +6,8 @@ module Htoprb
 
     attr_reader :win
 
-    def initialize(height = 0, width = 0, top = 0, left = 0)
-      @win = Curses::Window.new(height, width, top, left)
+    def initialize
+      @win = Curses::Window.new(0, 0, 0, 0)
       @win.scrollok(true)
       @win.setscrreg(Curses.lines, Curses.cols)
       @win.keypad(true)
