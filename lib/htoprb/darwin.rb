@@ -26,11 +26,6 @@ module Htoprb
       stdout.split("\n")
     end
 
-    def uptime
-      stdout, _stderr, _wait_thr = Open3.capture3('uptime')
-      stdout
-    end
-
     def combined_header_stats
       serializer.sysctl_stats(`sysctl -n hw.memsize vm.swapusage vm.loadavg kern.boottime`)
     end
