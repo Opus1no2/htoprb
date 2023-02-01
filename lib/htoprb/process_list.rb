@@ -26,7 +26,7 @@ module Htoprb
       @moving = false
 
       @process = process
-      @win = window.win
+      @win = window
       @header = header
       @serializer = serializer
 
@@ -44,15 +44,16 @@ module Htoprb
     def update_header_stats
       @header.tap do |h|
         h.total_tasks = @process_list.length
-        h.total_running = @process_list.reject { |p| p.process['state'][/r/i].nil? }.length
+        h.total_running = @process_list.reject do |p|
+          p.process['state'][/r/i].nil?
+        end.length
       end
     end
 
     def render_column_header
       @win.setpos(@y, 0)
-      @win.attron(Curses.color_pair(Curses::COLOR_GREEN))
-      @win << @process_list.first.str
-      @win.attroff(Curses.color_pair(Curses::COLOR_GREEN))
+
+      @win.add_str(@process_list.first.str, Curses::COLOR_GREEN)
     end
 
     def render_process_list
@@ -60,9 +61,7 @@ module Htoprb
         @win.setpos(idx, 0)
 
         if @current == process.id
-          @win.attron(Curses.color_pair(Curses::COLOR_CYAN))
-          @win << process.str
-          @win.attroff(Curses.color_pair(Curses::COLOR_CYAN))
+          @win.add_str(process.str, Curses::COLOR_CYAN)
         else
           @win << process.str
         end
@@ -97,7 +96,7 @@ module Htoprb
     end
 
     def max_pid
-      @process_list[1..].map { |p| p.process['pid'] }.max_by(&:length).length
+      platform.max_pid.to_s.length
     end
 
     def max_res

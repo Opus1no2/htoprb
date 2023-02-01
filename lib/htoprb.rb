@@ -2,13 +2,16 @@
 
 require_relative 'htoprb/version'
 
+require 'date'
 require 'curses'
 require 'open3'
 require 'singleton'
+require 'delegate'
 require 'htoprb/linux'
 require 'htoprb/darwin'
 require 'htoprb/screen_manager'
 require 'htoprb/window'
+require 'htoprb/darwin_serializer'
 require 'htoprb/header'
 require 'htoprb/process_serializer'
 require 'htoprb/process'

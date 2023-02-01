@@ -15,24 +15,18 @@ module Htoprb
     end
 
     def update_stats
-      calculate_uptime
+      header_stats = combined_header_stats
 
       @window.setpos(0, 0)
       @window << "Tasks: #{total_tasks}, #{total_running} running"
       @window.setpos(1, 0)
-      @window << "Load average: #{@load_average}"
+      @window << "Load average: #{header_stats[:load_avg]}"
       @window.setpos(2, 0)
-      @window << "Uptime: #{@total_uptime}"
+      @window << "Uptime: #{header_stats[:uptime]}"
     end
 
-    def calculate_uptime
-      # surely there's a better way...
-      unless /up\s(?<uptime>\d+\sday,\s\d+:\d+)\s*,.*load averages:\s(?<load_avg>\d+\.\d+\s\d+\.\d+\s\d+\.\d+)/ =~ platform.uptime
-        return
-      end
-
-      @total_uptime = uptime
-      @load_average = load_avg
+    def combined_header_stats
+      platform.combined_header_stats
     end
 
     def platform
