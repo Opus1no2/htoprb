@@ -115,13 +115,13 @@ module Htoprb
     def handle_key_up
       @moving = true
 
-      return if @current == @process_list_y
+      return if @current == @y + 1
 
       # This needs work
-      # if end_idx > (@process_list.length - 2) - @process_list_y
-      # @start_idx += -1
-      # @end_idx += -1
-      # end
+      if @end_idx > Curses.lines - 2
+        @start_idx += -1
+        @end_idx += -1
+      end
 
       @current += -1
       @needs_refresh = true

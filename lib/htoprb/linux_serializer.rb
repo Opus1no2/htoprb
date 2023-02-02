@@ -5,25 +5,37 @@ module Htoprb
     include Singleton
 
     def combined_header_stats(mem_info, load_avg, uptime)
+      swap_total = swap_total(mem_info)
+      swap_used = swap_total - swap_used(mem_info)
+
       {
         total_mem: total_mem(mem_info),
-        swap_total: swap_total(mem_info),
-        swap_free: swap_free(mem_info),
+        swap_total: swap_total,
+        swap_used: swap_used,
         load_avg: load_average(load_avg),
         uptime: uptime(uptime)
       }
     end
 
     def total_mem(mem_info)
-      mem_info.match(/MemTotal:\s{1,}(\d{1,})/).captures.first.to_i
+      mem_info.match(/MemTotal:\s{1,}(\d{1,})/)
+        .captures
+        .first
+        .to_f / 1024 / 1024
     end
 
     def swap_total(mem_info)
-      mem_info.match(/SwapTotal:\s{1,}(\d{1,})/).captures.first.to_i
+      mem_info.match(/SwapTotal:\s{1,}(\d{1,})/)
+        .captures
+        .first
+        .to_f / 1024 / 1024
     end
 
-    def swap_free(mem_info)
-      mem_info.match(/SwapFree:\s{1,}(\d{1,})/).captures.first.to_i
+    def swap_used(mem_info)
+      mem_info.match(/SwapFree:\s{1,}(\d{1,})/)
+        .captures
+        .first
+        .to_f / 1024 / 1024
     end
 
     def load_average(load_avg)
