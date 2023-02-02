@@ -48,6 +48,7 @@ module Htoprb
           p.process['state'][/r/i].nil?
         end.length
       end
+      @header.update_stats
     end
 
     def render_column_header

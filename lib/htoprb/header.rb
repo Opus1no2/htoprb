@@ -3,7 +3,7 @@
 module Htoprb
   class Header
     attr_reader :height
-    attr_accessor :total_tasks, :total_running
+    attr_accessor :total_tasks, :total_running, :combined_header_stats
 
     HEIGHT = 8
 
@@ -15,14 +15,14 @@ module Htoprb
     end
 
     def update_stats
-      header_stats = combined_header_stats
+      @combined_header_stats = combined_header_stats
 
       @window.setpos(0, 0)
       @window << "Tasks: #{total_tasks}, #{total_running} running"
       @window.setpos(1, 0)
-      @window << "Load average: #{header_stats[:load_avg]}"
+      @window << "Load average: #{@combined_header_stats[:load_avg]}"
       @window.setpos(2, 0)
-      @window << "Uptime: #{header_stats[:uptime]}"
+      @window << "Uptime: #{@combined_header_stats[:uptime]}"
     end
 
     def combined_header_stats
