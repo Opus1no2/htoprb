@@ -8,15 +8,23 @@ module Htoprb
       refined_stats = {}
       raw_stats = stats.split("\n")
 
+      swap_total = swap_total(raw_stats[1])
+      swap_used = swap_total - swap_used(raw_stats[1])
+
       refined_stats[:phys_mem] = phys_mem(raw_stats[0])
-      refined_stats[:swap_usage] = swap(raw_stats[1])
+      refined_stats[:swap_total] = swap_total
+      refined_stats[:swap_used] = swap_used
       refined_stats[:load_avg] = load_avg(raw_stats[2])
       refined_stats[:uptime] = uptime(raw_stats[3])
       refined_stats
     end
 
-    def swap(raw_swap)
-      raw_swap.match(/total\s=\s(\d\.\d{1,}).*free\s=\s(\d\.\d{1,})/).captures
+    def swap_total(raw_swap)
+      raw_swap.match(/total\s=\s(\d\.\d{1,})/).captures.first.to_f
+    end
+
+    def swap_used(raw_swap)
+      raw_swap.match(/free\s=\s(\d\.\d{1,})/).captures.first.to_f
     end
 
     def load_avg(raw_load_avg)
