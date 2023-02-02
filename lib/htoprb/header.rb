@@ -2,29 +2,27 @@
 
 module Htoprb
   class Header
-    attr_reader :height
+    attr_reader :height, :view
     attr_accessor :total_tasks, :total_running, :combined_header_stats
 
     HEIGHT = 8
 
-    def initialize(window = Window.instance)
+    def initialize(view = HeaderView.instance)
+      @view = view
       @height = HEIGHT
-      @window = window.win
       @total_uptime = 'NA'
+      @total_running = 'NA'
+      @total_tasks = 'NA'
       @load_average = 'NA'
     end
 
     def update_stats
-      @combined_header_stats = combined_header_stats
+      header_stats = combined_header_stats
 
-      @window.setpos(0, 0)
-      @window << "Tasks: #{total_tasks}, #{total_running} running"
-      @window.setpos(1, 0)
-      @window << "Load average: #{@combined_header_stats[:load_avg]}"
-      @window.setpos(2, 0)
-      @window << "Uptime: #{@combined_header_stats[:uptime]}"
-      @window.setpos(3, 0)
-      @window << "Swp: #{@combined_header_stats[:swap_total]}GB used: #{@combined_header_stats[:swap_used]}GB"
+      view.tasks(total_tasks, total_running)
+      view.load_average(header_stats[:load_avg])
+      view.uptime(header_stats[:uptime])
+      view.swap(header_stats[:swap_total], header_stats[:swap_used])
     end
 
     def combined_header_stats

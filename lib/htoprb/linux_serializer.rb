@@ -10,8 +10,8 @@ module Htoprb
 
       {
         total_mem: total_mem(mem_info),
-        swap_total: swap_total,
-        swap_used: swap_used,
+        swap_total:,
+        swap_used:,
         load_avg: load_average(load_avg),
         uptime: uptime(uptime)
       }
@@ -19,23 +19,23 @@ module Htoprb
 
     def total_mem(mem_info)
       mem_info.match(/MemTotal:\s{1,}(\d{1,})/)
-        .captures
-        .first
-        .to_f / 1024 / 1024
+              .captures
+              .first
+              .to_f / 1024 / 1024
     end
 
     def swap_total(mem_info)
       mem_info.match(/SwapTotal:\s{1,}(\d{1,})/)
-        .captures
-        .first
-        .to_f / 1024 / 1024
+              .captures
+              .first
+              .to_f / 1024 / 1024
     end
 
     def swap_used(mem_info)
       mem_info.match(/SwapFree:\s{1,}(\d{1,})/)
-        .captures
-        .first
-        .to_f / 1024 / 1024
+              .captures
+              .first
+              .to_f / 1024 / 1024
     end
 
     def load_average(load_avg)
