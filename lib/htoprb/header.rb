@@ -22,6 +22,7 @@ module Htoprb
       tasks(stats[:total_tasks], stats[:total_running])
       load_average(stats[:load_avg])
       uptime(stats[:uptime])
+      phys_mem(stats[:phys_mem])
       swap(stats[:swap_total], stats[:swap_used])
     end
 
@@ -51,8 +52,13 @@ module Htoprb
       window << "Uptime: #{uptime}"
     end
 
-    def swap(total, used)
+    def phys_mem(total)
       window.setpos(3, 0)
+      window << "Mem: #{total}G"
+    end
+
+    def swap(total, used)
+      window.setpos(4, 0)
       window << "Swp: #{total}GB used: #{used}GB"
     end
   end
