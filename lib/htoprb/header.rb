@@ -3,7 +3,7 @@
 module Htoprb
   class Header
     attr_reader :height, :view
-    attr_accessor :total_tasks, :total_running, :combined_header_stats
+    attr_accessor :total_tasks, :total_running
 
     HEIGHT = 8
 
@@ -17,16 +17,19 @@ module Htoprb
     end
 
     def update_stats
-      header_stats = combined_header_stats
+      stats = combined_header_stats
 
-      view.tasks(total_tasks, total_running)
-      view.load_average(header_stats[:load_avg])
-      view.uptime(header_stats[:uptime])
-      view.swap(header_stats[:swap_total], header_stats[:swap_used])
+      view.tasks(stats[:total_tasks], stats[:total_running])
+      view.load_average(stats[:load_avg])
+      view.uptime(stats[:uptime])
+      view.swap(stats[:swap_total], stats[:swap_used])
     end
 
     def combined_header_stats
-      platform.combined_header_stats
+      platform.combined_header_stats.merge(
+        total_tasks:,
+        total_running:
+      )
     end
 
     def platform
