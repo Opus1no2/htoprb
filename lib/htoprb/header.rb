@@ -23,6 +23,8 @@ module Htoprb
       @window << "Load average: #{header_stats[:load_avg]}"
       @window.setpos(2, 0)
       @window << "Uptime: #{header_stats[:uptime]}"
+      @window.setpos(3, 0)
+      @window << "Swp: #{header_stats[:swap_usage].first} used: #{header_stats[:swap_usage].last}"
     end
 
     def combined_header_stats
