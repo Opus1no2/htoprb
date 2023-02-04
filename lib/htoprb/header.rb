@@ -17,20 +17,13 @@ module Htoprb
     end
 
     def update_stats
-      stats = combined_header_stats
+      mem_stats = platform.mem_stats
 
-      tasks(stats[:total_tasks], stats[:total_running])
-      load_average(stats[:load_avg])
-      uptime(stats[:uptime])
-      phys_mem(stats[:phys_mem])
-      swap(stats[:swap_total], stats[:swap_used])
-    end
-
-    def combined_header_stats
-      platform.combined_header_stats.merge(
-        total_tasks:,
-        total_running:
-      )
+      tasks(total_tasks, total_running)
+      load_average(platform.load_average)
+      uptime(platform.uptime)
+      phys_mem(mem_stats[:physical_memory])
+      swap(mem_stats[:swap_total], mem_stats[:swap_used])
     end
 
     def platform

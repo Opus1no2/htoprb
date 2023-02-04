@@ -4,16 +4,19 @@ module Htoprb
   class LinuxSerializer
     include Singleton
 
-    def combined_header_stats(mem_info, load_avg, uptime)
-      swap_total = swap_total(mem_info)
-      swap_used = swap_total - swap_used(mem_info)
+    def serialized_cpu_info(raw_stats, cores)
+      raw_stats[1..cores].each_with_object({}) do |row, obj|
+        parts = row.split
 
+        obj[parts[0]] = parts[1..5]
+      end
+    end
+
+    def mem_stats(mem_info)
       {
-        total_mem: total_mem(mem_info),
-        swap_total:,
-        swap_used:,
-        load_avg: load_average(load_avg),
-        uptime: uptime(uptime)
+        phyical_memory: total_mem(mem_info),
+        swap_total: swap_total(mem_info),
+        swap_free: swap_free(mem_info)
       }
     end
 
@@ -31,7 +34,7 @@ module Htoprb
               .to_f / 1024 / 1024
     end
 
-    def swap_used(mem_info)
+    def swap_free(mem_info)
       mem_info.match(/SwapFree:\s{1,}(\d{1,})/)
               .captures
               .first
@@ -43,8 +46,7 @@ module Htoprb
     end
 
     def uptime(uptime)
-      seconds = uptime.split.first
-      seconds_to_human_readable(seconds)
+      seconds_to_human_readable(uptime.split.first)
     end
 
     def seconds_to_human_readable(seconds)

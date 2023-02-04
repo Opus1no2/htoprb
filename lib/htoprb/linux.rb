@@ -4,9 +4,10 @@ module Htoprb
   class Linux
     attr_reader :serializer
 
-    MEM_INFO_PATH = '/proc/meminfo'
-    LOAD_AVG_PATH = '/proc/loadavg'
-    UPTIME_PATH   = '/proc/uptime'
+    STAT_INFO_PATH = '/proc/stat'
+    MEM_INFO_PATH  = '/proc/meminfo'
+    LOAD_AVG_PATH  = '/proc/loadavg'
+    UPTIME_PATH    = '/proc/uptime'
 
     def initialize(serializer = LinuxSerializer.instance)
       @serializer = serializer
@@ -25,29 +26,42 @@ module Htoprb
       'command' => 'Command'
     }.freeze
 
+    def cores
+      @cores ||= `nproc`.to_i
+    end
+
     def process_list
-      stdout, _stderr, _wait_thr = Open3.capture3('ps', 'axo', column_names, '--sort', '-%cpu')
-      stdout.split("\n")
+      `ps axo #{column_names} --sort -%cpu`.split("\n")
     end
 
-    def combined_header_stats
-      serializer.combined_header_stats(mem_info, load_avg, uptime)
+    def cpu_info
+      serializer.serialized_cpu_info(File.read(STAT_INFO_PATH), cores)
     end
 
-    def mem_info
-      File.read(MEM_INFO_PATH)
+    def mem_stats
+      stats = serializer.mem_stats(File.read(MEM_INFO_PATH))
+
+      swap_total = stats[:swap_total]
+      swap_used = swap_total - stats[:swap_free]
+      physical_memory = stats[:phyical_memory]
+
+      {
+        swap_total:,
+        swap_used:,
+        physical_memory:
+      }
     end
 
-    def load_avg
-      File.read(LOAD_AVG_PATH)
+    def load_average
+      serializer.load_average(File.read(LOAD_AVG_PATH))
     end
 
     def uptime
-      File.read(UPTIME_PATH)
+      serializer.uptime(File.read(UPTIME_PATH))
     end
 
     def max_pid
-      99_999
+      99_999 # this needs to be dynamic
     end
 
     def column_names
