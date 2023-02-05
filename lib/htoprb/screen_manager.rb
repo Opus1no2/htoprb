@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'pry'
 module Htoprb
   class ScreenManager
     include Curses
@@ -27,11 +28,17 @@ module Htoprb
       init_screen
     end
 
+    def handle_mouse_click(event)
+      # process_list.select_item(event)
+    end
+
     def init
       @process_list.init
       @header.update_stats
 
       old_time = Time.now
+
+      mousemask(BUTTON1_CLICKED)
 
       loop do
         ch = process_list.win.getch
@@ -51,9 +58,11 @@ module Htoprb
         end
 
         case ch
-        when Curses::KEY_UP
+        when KEY_MOUSE
+          handle_mouse_click(getmouse)
+        when KEY_UP
           process_list.handle_key_up
-        when Curses::KEY_DOWN
+        when KEY_DOWN
           process_list.handle_key_down
         when nil
           process_list.moving = false

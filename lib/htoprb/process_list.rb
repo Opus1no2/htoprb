@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'pry'
 module Htoprb
   # TODO: separate process list logic from ncurses logic
   class ProcessList
@@ -31,8 +30,8 @@ module Htoprb
       @serializer = serializer
 
       @y = @header.height + 1
-      @start_idx = @y + 1
-      @current = @y + 1
+      @start_idx = 1
+      @current = 1
     end
 
     def init
@@ -115,7 +114,7 @@ module Htoprb
     def handle_key_up
       @moving = true
 
-      return if @current == @y + 1
+      return if @current == 1
 
       # This needs work
       if @end_idx > Curses.lines - 2
@@ -130,7 +129,7 @@ module Htoprb
     def handle_key_down
       @moving = true
 
-      return if @current == @process_list.length - 2
+      return if @current == @process_list.length - 1
 
       if (@current + 1 > Curses.lines - 2) && (@process_list.length >= Curses.lines - 2)
         @start_idx += 1
