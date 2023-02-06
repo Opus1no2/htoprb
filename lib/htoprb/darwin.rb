@@ -22,12 +22,19 @@ module Htoprb
     }.freeze
 
     def process_list
-      stdout, _stderr, _wait_thr = Open3.capture3('ps', 'axro', column_names)
-      stdout.split("\n")
+      `ps axro #{column_names}`.split("\n")
     end
 
-    def combined_header_stats
-      serializer.sysctl_stats(`sysctl -n hw.memsize vm.swapusage vm.loadavg kern.boottime`)
+    def mem_stats
+      serializer.mem_stats(`sysctl -n hw.memsize vm.swapusage`)
+    end
+
+    def load_average
+      serializer.load_average(`sysctl -n vm.loadavg`)
+    end
+
+    def uptime
+      serializer.uptime(`sysctl -n kern.boottime`)
     end
 
     def max_pid

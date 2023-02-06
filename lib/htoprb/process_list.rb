@@ -68,7 +68,6 @@ module Htoprb
 
         @win.clrtoeol
       end
-
       @win.refresh
       @needs_refresh = false
     end
@@ -104,11 +103,11 @@ module Htoprb
     end
 
     def end_idx
-      @end_idx ||= if @process_list.length >= @win.maxy - @header.height
-                     @win.maxy - 2
-                   else
-                     @process_list.length - 1
-                   end
+      @end_idx = if @process_list.length > (Curses.lines - @header.height)
+                   Curses.lines - @header.height - 3
+                 else
+                   @process_list.length - 1
+                 end
     end
 
     def handle_key_up

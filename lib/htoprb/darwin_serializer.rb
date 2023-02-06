@@ -4,30 +4,28 @@ module Htoprb
   class DarwinSerializer
     include Singleton
 
-    def sysctl_stats(stats)
-      refined_stats = {}
-      raw_stats = stats.split("\n")
+    def mem_stats(raw_mem)
+      stats = raw_mem.split("\n")
+      swap_total = swap_total(stats.last)
+      swap_free  = swap_free(stats.last)
+      swap_used  = swap_total - swap_free
 
-      swap_total = swap_total(raw_stats[1])
-      swap_used = swap_total - swap_used(raw_stats[1])
-
-      refined_stats[:phys_mem] = phys_mem(raw_stats[0])
-      refined_stats[:swap_total] = swap_total
-      refined_stats[:swap_used] = swap_used
-      refined_stats[:load_avg] = load_avg(raw_stats[2])
-      refined_stats[:uptime] = uptime(raw_stats[3])
-      refined_stats
+      {
+        physical_memory: phys_mem(stats.first),
+        swap_total:,
+        swap_used:
+      }
     end
 
     def swap_total(raw_swap)
       raw_swap.match(/total\s=\s(\d\.\d{1,})/).captures.first.to_f
     end
 
-    def swap_used(raw_swap)
+    def swap_free(raw_swap)
       raw_swap.match(/free\s=\s(\d\.\d{1,})/).captures.first.to_f
     end
 
-    def load_avg(raw_load_avg)
+    def load_average(raw_load_avg)
       raw_load_avg.split[1..-2].join(' ')
     end
 
