@@ -21,10 +21,10 @@ module Htoprb
     end
 
     def total_mem(mem_info)
-      mem_info.match(/MemTotal:\s{1,}(\d{1,})/)
+      (mem_info.match(/MemTotal:\s{1,}(\d{1,})/)
               .captures
               .first
-              .to_f / 1024 / 1024
+              .to_f / 1024 / 1024).round(2)
     end
 
     def swap_total(mem_info)

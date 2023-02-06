@@ -5,9 +5,10 @@ module Htoprb
     attr_reader :height, :window
     attr_accessor :total_tasks, :total_running
 
-    HEIGHT = 8
+    HEIGHT = 9
 
     def initialize(window = Window.instance)
+      @x = 1
       @window = window
       @height = HEIGHT
       @total_uptime = 'NA'
@@ -31,27 +32,27 @@ module Htoprb
     end
 
     def tasks(total, running)
-      window.setpos(0, 0)
+      window.setpos(4, @x)
       window << "Tasks: #{total}, #{running} running"
     end
 
     def load_average(load_average)
-      window.setpos(1, 0)
+      window.setpos(5, @x)
       window << "Load average: #{load_average}"
     end
 
     def uptime(uptime)
-      window.setpos(2, 0)
+      window.setpos(6, @x)
       window << "Uptime: #{uptime}"
     end
 
     def phys_mem(total)
-      window.setpos(3, 0)
+      window.setpos(7, @x)
       window << "Mem: #{total}G"
     end
 
     def swap(total, used)
-      window.setpos(4, 0)
+      window.setpos(8, @x)
       window << "Swp: #{total}GB used: #{used}GB"
     end
   end

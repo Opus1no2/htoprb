@@ -5,10 +5,9 @@ module Htoprb
     attr_reader :id, :str, :process
 
     def initialize(process, id, serializer = ProcessSerializer.instance)
-      @process = process
       @id = id
       @str = ''
-      @selected = false
+      @process = process
       @serializer = serializer
     end
 
