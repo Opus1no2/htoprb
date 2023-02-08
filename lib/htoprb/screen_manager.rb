@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'pry'
 module Htoprb
   class ScreenManager
     include Curses
@@ -24,12 +23,9 @@ module Htoprb
       start_color
       init_pair(COLOR_CYAN, COLOR_BLACK, COLOR_CYAN)
       init_pair(COLOR_GREEN, COLOR_BLACK, COLOR_GREEN)
+      init_pair(9, COLOR_CYAN, COLOR_BLACK)
 
       init_screen
-    end
-
-    def handle_mouse_click(event)
-      # process_list.select_item(event)
     end
 
     def init
@@ -59,7 +55,7 @@ module Htoprb
 
         case ch
         when KEY_MOUSE
-          handle_mouse_click(getmouse)
+          process_list.handle_mouse_click(getmouse)
         when KEY_UP
           process_list.handle_key_up
         when KEY_DOWN

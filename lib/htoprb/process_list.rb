@@ -140,5 +140,9 @@ module Htoprb
       @current += 1
       @needs_refresh = true
     end
+
+    def handle_mouse_click(event)
+      # process_list.select_item(event)
+    end
   end
 end

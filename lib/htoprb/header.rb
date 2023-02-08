@@ -33,27 +33,42 @@ module Htoprb
 
     def tasks(total, running)
       window.setpos(4, @x)
-      window << "Tasks: #{total}, #{running} running"
+      window.attron(Curses.color_pair(9))
+      window << 'Tasks:'
+      window.attroff(Curses.color_pair(9))
+      window << " #{total}, #{running} running"
     end
 
     def load_average(load_average)
       window.setpos(5, @x)
-      window << "Load average: #{load_average}"
+      window.attron(Curses.color_pair(9))
+      window << 'Load average:'
+      window.attroff(Curses.color_pair(9))
+      window << " #{load_average}"
     end
 
     def uptime(uptime)
       window.setpos(6, @x)
-      window << "Uptime: #{uptime}"
+      window.attron(Curses.color_pair(9))
+      window << 'Uptime:'
+      window.attroff(Curses.color_pair(9))
+      window << " #{uptime}"
     end
 
     def phys_mem(total)
       window.setpos(7, @x)
-      window << "Mem: #{total}G"
+      window.attron(Curses.color_pair(9))
+      window << 'Mem:'
+      window.attroff(Curses.color_pair(9))
+      window << " #{total}G"
     end
 
     def swap(total, used)
       window.setpos(8, @x)
-      window << "Swp: #{total}GB used: #{used}GB"
+      window.attron(Curses.color_pair(9))
+      window << 'Swp:'
+      window.attroff(Curses.color_pair(9))
+      window << " #{total}GB used: #{used}GB"
     end
   end
 end
