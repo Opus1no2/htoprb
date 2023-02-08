@@ -38,6 +38,7 @@ module Htoprb
       refresh_process_list
       update_header_stats
       render_column_header
+      calculate_end_idx
     end
 
     def update_header_stats
@@ -57,7 +58,7 @@ module Htoprb
     end
 
     def render_process_list
-      @process_list[@start_idx..end_idx].each.with_index(@y + 1) do |process, idx|
+      @process_list[@start_idx..@end_idx].each.with_index(@y + 1) do |process, idx|
         @win.setpos(idx, 0)
 
         if @current == process.id
@@ -102,7 +103,7 @@ module Htoprb
       @process_list[1..].map { |p| p.process['rss'] }.max_by(&:length).length
     end
 
-    def end_idx
+    def calculate_end_idx
       @end_idx = if @process_list.length > (Curses.lines - @header.height)
                    Curses.lines - @header.height - 3
                  else
@@ -116,7 +117,7 @@ module Htoprb
       return if @current == 1
 
       # This needs work
-      if @end_idx > Curses.lines - 2
+      if @current == @start_idx
         @start_idx += -1
         @end_idx += -1
       end
@@ -130,7 +131,8 @@ module Htoprb
 
       return if @current == @process_list.length - 1
 
-      if (@current + 1 > Curses.lines - 2) && (@process_list.length >= Curses.lines - 2)
+      # This can probably be a bit better
+      if (@current + 1 > (Curses.lines - @header.height - 3)) && (@process_list.length >= Curses.lines - 2)
         @start_idx += 1
         @end_idx += 1
       end
