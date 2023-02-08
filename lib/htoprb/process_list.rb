@@ -132,7 +132,7 @@ module Htoprb
       return if @current == @process_list.length - 1
 
       # This can probably be a bit better
-      if (@current + 1 > (Curses.lines - @header.height - 3)) && (@process_list.length >= Curses.lines - 2)
+      if @current == @end_idx
         @start_idx += 1
         @end_idx += 1
       end
